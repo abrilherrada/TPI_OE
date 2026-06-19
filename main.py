@@ -185,3 +185,100 @@ def seleccionar_profesional(id_especialidad):
     # Si la entrada no es válida, mostrar mensaje de error
     except ValueError as e:
       print(f"\nBot: {e} Por favor, ingrese una opción válida.")
+
+def buscar_turnos(profesionales):
+  """
+  Busca los turnos disponibles para los profesionales seleccionados.
+  
+  Args:
+    profesionales (list): Lista de profesionales seleccionados.
+  
+  Returns:
+    list: Lista de turnos disponibles.
+  """
+  # Cargar todos los turnos
+  turnos_totales = cargar_turnos()
+  # Inicializar listas vacías para almacenar los turnos disponibles y los IDs de los profesionales
+  turnos_disponibles = []
+  ids_profesionales = []
+
+  # Recorrer la lista de profesionales seleccionados
+  for profesional in profesionales:
+    # Agregar el ID del profesional a la lista de IDs de profesionales
+    ids_profesionales.append(profesional["id"])
+
+  # Recorrer la lista de turnos totales
+  for turno in turnos_totales:
+    # Si el turno está disponible y el ID del profesional está en la lista de IDs de profesionales
+    if turno["id_profesional"] in ids_profesionales and turno["disponible"] == "True":
+      # Agregar el turno a la lista de turnos disponibles
+      turnos_disponibles.append(turno)
+
+  # Determinar el mensaje según la cantidad de profesionales seleccionados
+  cantidad_profesionales = "el profesional seleccionado" if len(ids_profesionales) == 1 else "los profesionales seleccionados"
+  
+  # Si no hay turnos disponibles
+  if len(turnos_disponibles) == 0:
+    # Mostrar mensaje de error con mensaje dinámico y devolver None
+    print(f"\nBot: No hay turnos disponibles para la especialidad y {cantidad_profesionales}.")
+    return None
+
+  # Si hay turnos disponibles
+  else:
+    # Devolver lista de turnos disponibles
+    return turnos_disponibles
+
+def seleccionar_turno(turnos_disponibles, profesionales):
+  """
+  Permite al usuario seleccionar un turno de la lista de turnos disponibles.
+  
+  Args:
+    turnos_disponibles (list): Lista de turnos disponibles.
+    profesionales (list): Lista de profesionales.
+  
+  Returns:
+    dict: Turno seleccionado.
+  """
+  # Imprimir mensaje sobre turnos disponibles
+  print("\nBot: Podemos ofrecerle los siguientes turnos:")
+
+  # Recorrer la lista de turnos disponibles
+  for i in range(len(turnos_disponibles)):
+    # Inicializar variable para almacenar el nombre del profesional
+    nombre_profesional = None
+
+    # Recorrer la lista de profesionales
+    for profesional in profesionales:
+      # Si el ID del profesional coincide con el ID del turno
+      if profesional["id"] == turnos_disponibles[i]["id_profesional"]:
+        # Asignar el nombre del profesional
+        nombre_profesional = profesional["nombre"]
+        # Salir del bucle
+        break
+
+    # Imprimir el turno con el nombre del profesional
+    print(f"{i + 1}. {nombre_profesional} - {turnos_disponibles[i]['fecha']} {turnos_disponibles[i]['hora']}")
+
+  # Imprimir mensaje para que el usuario elija un turno
+  print("\nBot: Ingrese el número correspondiente al turno que desea reservar o 0 para salir.")
+
+  # Solicitar opción hasta que sea válida
+  while True:
+    # Intentar obtener entrada válida
+    try:
+      # Solicitar opción al usuario
+      opcion = input("\nUsuario: ")
+      # Validar opción
+      validar_opcion(opcion, (0, len(turnos_disponibles)))
+
+      # Si el usuario quiere salir, devolver None
+      if opcion == "0":
+        return None
+
+      # Si la opción es válida, devolver el turno seleccionado
+      else:
+        return turnos_disponibles[int(opcion) - 1]
+
+    # Si la entrada no es válida, mostrar mensaje de error
+    except ValueError as e:
+      print(f"\nBot: {e} Por favor, elija un turno de la lista o 0 para salir.")
