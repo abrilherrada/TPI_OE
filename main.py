@@ -282,3 +282,79 @@ def seleccionar_turno(turnos_disponibles, profesionales):
     # Si la entrada no es válida, mostrar mensaje de error
     except ValueError as e:
       print(f"\nBot: {e} Por favor, elija un turno de la lista o 0 para salir.")
+
+def confirmar_turno(especialidad, profesional, turno):
+  """
+  Confirma el turno seleccionado.
+  
+  Args:
+    especialidad (str): Especialidad seleccionada.
+    profesional (str): Profesional seleccionado.
+    turno (dict): Turno seleccionado.
+  
+  Returns:
+    bool: True si el turno se confirma, False en caso contrario.
+  """
+  # Imprimir el turno seleccionado y las opciones
+  print(f"""\nBot: Seleccionó el siguiente turno:
+  Consulta de {especialidad} con {profesional} el {turno['fecha']} a las {turno['hora']}.
+  ¿Desea confirmar este turno?
+  1. Sí
+  2. No""")
+
+  # Solicitar opción hasta que sea válida
+  while True:
+    # Intentar obtener entrada válida
+    try:
+      # Solicitar opción al usuario
+      opcion = input("\nUsuario: ")
+      # Validar opción
+      validar_opcion(opcion, (1, 2))
+
+      # Si el usuario confirma el turno, devolver True
+      if opcion == "1":
+        return True
+
+      # Si el usuario no confirma el turno, devolver False
+      else:
+        return False
+
+    # Si la entrada no es válida, mostrar mensaje de error
+    except ValueError as e:
+      print(f"\nBot: {e} Por favor, ingrese 1 para confirmar o 2 para rechazar.")
+
+def registrar_turno(paciente, id_turno):
+  """
+  Registra el turno seleccionado.
+  
+  Args:
+    paciente (str): Paciente que solicita el turno.
+    id_turno (int): ID del turno seleccionado.
+  """
+  # Crear reserva
+  reserva = {
+    "paciente": paciente,
+    "id_turno": id_turno,
+    "estado": "confirmado"
+  }
+  # Guardar reserva
+  guardar_reserva(reserva)
+
+  # Actualizar disponibilidad del turno
+  actualizar_turno(id_turno)
+
+  # Imprimir mensaje de confirmación
+  print("\nBot: Su turno ha sido registrado correctamente.")
+
+def despedirse():
+  """
+  Despide al paciente.
+  
+  Returns:
+    bool: False para indicar que el sistema debe cerrarse.
+  """
+  # Imprimir mensaje de despedida
+  print("\nBot: Gracias por usar el sistema de turnos.\n")
+
+  # Devolver False para indicar que el sistema debe cerrarse
+  return False
