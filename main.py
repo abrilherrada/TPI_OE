@@ -87,12 +87,13 @@ def seleccionar_especialidad():
     try:
       # Solicitar especialidad al usuario
       opcion = input("\nUsuario: ")
-      # Validar especialidad
-      especialidad = validar_especialidad(opcion, especialidades)
 
       # Si el usuario quiere salir, devolver None
       if opcion == "0":
         return None
+
+      # Validar especialidad
+      especialidad = validar_especialidad(opcion, especialidades)
 
       # Si la especialidad es válida, devolverla
       return especialidad
@@ -358,3 +359,108 @@ def despedirse():
 
   # Devolver False para indicar que el sistema debe cerrarse
   return False
+
+# ==============================================================================
+# BLOQUE PRINCIPAL
+# ==============================================================================
+
+# VARIABLES
+# Bandera para controlar la ejecución del sistema
+sistema_activo = True
+
+# BUCLE PRINCIPAL
+# Mientras el sistema esté activo, el programa continuará ejecutándose
+while sistema_activo:
+  # Saludar al paciente
+  paciente = saludar()
+
+  # Solicitar acción al paciente
+  opcion = seleccionar_accion("Ver turnos disponibles")
+
+  # Procesar la acción seleccionada
+  match opcion:
+    # Opción 1: Ver turnos disponibles
+    case "1":
+      # Bucle para mantener la interacción con el usuario hasta que seleccione un turno o decida salir
+      while True:
+        # Seleccionar especialidad
+        especialidad = seleccionar_especialidad()
+        # Si el usuario decide salir
+        if especialidad is None:
+          # Despedirse y cerrar el sistema
+          sistema_activo = despedirse()
+          break
+
+        # Seleccionar profesional
+        profesionales = seleccionar_profesional(especialidad["id"])
+        # Si no hay profesionales disponibles o el usuario decide salir
+        if profesionales is None:
+          # Preguntar si quiere ver otras especialidades
+          decision = seleccionar_accion("Ver otras especialidades")
+          # Si el usuario elige ver otras especialidades
+          if decision == "1":
+            # Continuar el bucle para permitir otra selección
+            continue
+          # Si el usuario elige salir
+          else:
+            # Despedirse y cerrar el sistema
+            sistema_activo = despedirse()
+            break
+
+        # Buscar turnos disponibles
+        turnos_disponibles = buscar_turnos(profesionales)
+        # Si no hay turnos disponibles
+        if turnos_disponibles is None:
+          # Preguntar si quiere ver otras especialidades
+          decision = seleccionar_accion("Ver otras especialidades")
+          # Si el usuario elige ver otras especialidades
+          if decision == "1":
+            # Continuar el bucle para permitir otra selección
+            continue
+          # Si el usuario elige salir
+          else:
+            # Despedirse y cerrar el sistema
+            sistema_activo = despedirse()
+            break
+
+        # Seleccionar turno
+        turno_seleccionado = seleccionar_turno(turnos_disponibles, profesionales)
+        # Si el usuario decide salir
+        if turno_seleccionado is None:
+          # Preguntar si quiere ver otras especialidades
+          decision = seleccionar_accion("Ver otras especialidades")
+          # Si el usuario elige ver otras especialidades
+          if decision == "1":
+            # Continuar el bucle para permitir otra selección
+            continue
+          # Si el usuario elige salir
+          else:
+            # Despedirse y cerrar el sistema
+            sistema_activo = despedirse()
+            break
+
+        # Inicializar variable para el profesional seleccionado
+        profesional_seleccionado = None
+        # Recorrer la lista de profesionales
+        for profesional in profesionales:
+          # Si el ID del profesional coincide con el ID del profesional del turno seleccionado
+          if profesional["id"] == turno_seleccionado["id_profesional"]:
+            # Asignar el profesional seleccionado
+            profesional_seleccionado = profesional
+            # Salir del bucle
+            break
+
+        # Confirmar el turno
+        confirmar = confirmar_turno(especialidad["nombre"], profesional_seleccionado["nombre"], turno_seleccionado)
+        # Si el usuario confirma el turno
+        if confirmar:
+          # Registrar el turno
+          registrar_turno(paciente, turno_seleccionado["id"])
+        # Despedirse y cerrar el sistema
+        sistema_activo = despedirse()
+        break
+
+    # Opción 2: Salir
+    case "2":
+      # Despedirse y cerrar el sistema
+      sistema_activo = despedirse()
